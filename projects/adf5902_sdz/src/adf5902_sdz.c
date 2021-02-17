@@ -49,6 +49,10 @@
 #include "adf5902.h"
 #include "parameters.h"
 
+#ifdef IIO_SUPPORT
+#include "app_iio.h"
+#endif
+
 #define LOG_LEVEL 6
 #include "print_log.h"
 
@@ -214,6 +218,10 @@ int main(void)
 	}
 
 	pr_info("ADF5902 Temperature value: %.2f degC \n", temperature);
+
+#ifdef IIO_SUPPORT
+	return iio_server_init(dev);
+#endif
 
 	ret = adf5902_remove(dev);
 
