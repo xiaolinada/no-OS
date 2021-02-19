@@ -48,21 +48,11 @@
 #include <inttypes.h>
 #include "delay.h"
 #include "clk.h"
+#include "uc_settings.h"
 
 /******************************************************************************/
 /*************************** Types Declarations *******************************/
 /******************************************************************************/
-extern uint64_t clk_hz[][3];
-extern uint32_t vmax[];
-extern uint32_t fc[];
-extern uint8_t  rterm[];
-extern uint32_t en_hp[];
-extern uint32_t backoff[];
-extern uint32_t finmax[];
-extern uint64_t nco_freq_hz[][3];
-extern uint8_t  decimation[][4];
-extern uint8_t  nco0_datapath_mode[];
-extern adi_cms_jesd_param_t jtx_param[];
 extern int32_t adi_ad9083_jtx_startup(adi_ad9083_device_t *device,
 				      adi_cms_jesd_param_t *jtx_param);
 
@@ -233,6 +223,18 @@ int32_t ad9083_reset_pin_ctrl(void *user_data, uint8_t enable)
  */
 static int32_t ad9083_setup(struct ad9083_phy *device, uint8_t uc)
 {
+	struct uc_settings *uc_settings = get_uc_settings();
+	uint64_t *clk_hz = uc_settings->clk_hz[uc];
+	uint32_t vmax = uc_settings->vmax[uc];
+	uint32_t fc = uc_settings->fc[uc];
+	uint8_t rterm = uc_settings->rterm[uc];
+	uint32_t en_hp = uc_settings->en_hp[uc];
+	uint32_t backoff = uc_settings->backoff[uc];
+	uint32_t finmax = uc_settings->finmax[uc];
+	uint64_t *nco_freq_hz = uc_settings->nco_freq_hz[uc];
+	uint8_t *decimation = uc_settings->decimation[uc];
+	uint8_t nco0_datapath_mode = uc_settings->nco0_datapath_mode[uc];
+	adi_cms_jesd_param_t *jtx_param = &uc_settings->jtx_param[uc];
 	int32_t ret;
 
 	/* software reset, resistor is not mounted */
@@ -244,22 +246,22 @@ static int32_t ad9083_setup(struct ad9083_phy *device, uint8_t uc)
 	if (ret != SUCCESS)
 		return ret;
 
-	ret = adi_ad9083_device_clock_config_set(&device->adi_ad9083, clk_hz[uc][2],
-			clk_hz[uc][0]);
+	ret = adi_ad9083_device_clock_config_set(&device->adi_ad9083, clk_hz[2],
+			clk_hz[0]);
 	if (ret != SUCCESS)
 		return ret;
 
-	ret = adi_ad9083_rx_adc_config_set(&device->adi_ad9083, vmax[uc], fc[uc],
-					   rterm[uc], en_hp[uc], backoff[uc], finmax[uc]);
+	ret = adi_ad9083_rx_adc_config_set(&device->adi_ad9083, vmax, fc,
+					   rterm, en_hp, backoff, finmax);
 	if (ret != SUCCESS)
 		return ret;
 
 	ret = adi_ad9083_rx_datapath_config_set(&device->adi_ad9083,
-						nco0_datapath_mode[uc], decimation[uc], nco_freq_hz[uc]);
+						nco0_datapath_mode, decimation, nco_freq_hz);
 	if (ret != SUCCESS)
 		return ret;
 
-	ret = adi_ad9083_jtx_startup(&device->adi_ad9083, &jtx_param[uc]);
+	ret = adi_ad9083_jtx_startup(&device->adi_ad9083, jtx_param);
 	if (ret != SUCCESS)
 		return ret;
 
