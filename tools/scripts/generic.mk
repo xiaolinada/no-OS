@@ -127,9 +127,13 @@ endif
 #------------------------------------------------------------------------------
 
 ifeq 'xilinx' '$(PLATFORM)'
-HARDWARE := $(filter %.hdf, $(HARDWARE))
+TMP_HW := $(filter %.xsa, $(HARDWARE))
+ifeq '' '$(TMP_HW)'
+TMP_HW := $(filter %.hdf, $(HARDWARE))
+endif
+HARDWARE := $(TMP_HW)
 ifeq '' '$(HARDWARE)'
-$(error 'No HARDWARE for xilinx found. Add .hdf file')
+$(error 'No HARDWARE for xilinx found.')
 endif
 include $(NO-OS)/tools/scripts/xilinx.mk
 endif
@@ -234,7 +238,7 @@ DIRS_TO_CREATE = $(sort $(dir $(call relative_to_project, $(FILES_OUT_OF_DIRS) $
 DIRS_TO_REMOVE = $(addprefix $(PROJECT_BUILD)/,$(CREATED_DIRECTORIES))
 
 #Add to include all directories containing a .h file
-EXTRA_INC_PATHS += $(sort $(foreach dir, $(INCS_IN_BUILD),$(dir $(dir))))
+EXTRA_INC_PATHS := $(sort $(foreach dir, $(INCS_IN_BUILD),$(dir $(dir))))
 CFLAGS += $(addprefix -I,$(EXTRA_INC_PATHS)) $(PLATFORM_INCS)
 
 #------------------------------------------------------------------------------
